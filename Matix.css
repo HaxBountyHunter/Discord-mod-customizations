@@ -1,0 +1,26 @@
+/**
+ * @name Matrix Rain
+ * @author YourName
+ * @version 1.0.0
+ * @description A Matrix-style falling 1s and 0s background for Discord
+ * @source https://github.com/YourGitHub/MatrixRainTheme
+ * @website https://YourGitHub.github.io/MatrixRainTheme
+ */
+
+/* Import the main Matrix stylesheet hosted on GitHub Pages */
+@import url('https://YourGitHub.github.io/MatrixRainTheme/matrix.css');
+
+/* Customize theme variables here */
+:root,
+.visual-refresh,
+.visual-refresh.theme-dark {
+  --rgb-highlight: 0, 200, 0;     /* Accent highlight color */
+  --rgb-background: 0, 0, 0;      /* Background color */
+  --rgb-text: 0, 255, 0;          /* Main text color */
+
+  --background-image: unset;      /* Background image (optional) */
+  --background-position: center;
+  --background-size: cover;
+  --background-blur: 5px;         /* Blur for background */
+  --background-brightness: 100%;  /* Adjust brightness of background */
+}
