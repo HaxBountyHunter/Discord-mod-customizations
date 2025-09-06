@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pure Matrix Rain — Demo</title>
+  <link rel="stylesheet" href="matrix.css" />
+</head>
+<body>
+  <div id="controls">
+    <label>Columns: <input id="cols" type="number" min="4" max="120" value="36" /></label>
+    <label>Digits/column: <input id="digits" type="number" min="3" max="80" value="18" /></label>
+    <label>Speed (1 = fast, 5 = slow): <input id="speed" type="range" min="0.6" max="2.4" step="0.1" value="1" /></label>
+    <button id="regen">Regenerate</button>
+  </div>
+
+  <div id="matrix-root" aria-hidden="true"></div>
+
+  <script>
+    /* Matrix generator script
+       - creates columns with spans containing random 0/1 characters
+       - each span animates with randomized duration & delay for "rain"
+       - digits flicker occasionally (updates text) for realism
+    */
+
+    (function () {
+      const root = document.getElementById('matrix-root');
+      const colInput = document.getElementById('cols');
+      const digitInput = document.getElementById('digits');
+      const speedInput = document.getElementById('speed');
+      const regenBtn = document.getElementById('regen');
+
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+      function rndBit() { return Math.random() < 0.5 ? '0' : '1'; }
+
+      function buildMatrix(columns = 36, digitsPerCol = 18, globalSpeed = 1) {
+        root.innerHTML = '';
+        const vw = window.innerWidth;
+
+        for (let i = 0; i < columns; i++) {
+          const col = document.createElement('div');
+          col.className = 'matrix-column';
+          // position columns randomly across width (gives irregular spacing)
+          const left = (i / columns) * 100 + rand(-1.2, 1.2);
+          col.style.left = Math.max(0, Math.min(100, left)) + '%';
+
+          // make each column a slightly different width on very small screens
+          col.style.width = '2ch';
+
+          for (let d = 0; d < digitsPerCol; d++) {
+            const span = document.createElement('span');
+            span.className = 'digit';
+            span.textContent = rndBit();
+
+            // randomize timing to simulate randomness
+            const dur = rand(3.0, 10.0) * globalSpeed; // seconds
+            const delay = -rand(0, dur); // negative delay -> appear mid-animation
+
+            span.style.animationDuration = dur + 's';
+            span.style.animationDelay = delay + 's';
+
+            // random opacity/brightness per span
+            span.style.opacity = (rand(0.18, 0.9)).toFixed(2);
+
+            // occasionally make a span brighter with a CSS class (leader)
+            if (Math.random() < 0.12) span.classList.add('leader');
+
+            col.appendChild(span);
+          }
+
+          root.appendChild(col);
+        }
+      }
+
+      // flicker/update digits occasionally for realism
+      function startFlicker(intervalMs = 120) {
+        clearInterval(window._matrix_flicker);
+        window._matrix_flicker = setInterval(() => {
+          // choose a small random set of spans to change
+          const all = document.querySelectorAll('#matrix-root .matrix-column .digit');
+          if (!all.length) return;
+          const changes = Math.max(1, Math.floor(all.length * 0.007)); // small fraction
+          for (let i = 0; i < changes; i++) {
+            const idx = Math.floor(Math.random() * all.length);
+            all[idx].textContent = Math.random() < 0.5 ? '0' : '1';
+            // sometimes toggle leader
+            if (Math.random() < 0.02) all[idx].classList.toggle('leader');
+          }
+        }, intervalMs);
+      }
+
+      function applyFromControls() {
+        const columns = parseInt(colInput.value, 10) || 36;
+        const digits = parseInt(digitInput.value, 10) || 18;
+        const speed = parseFloat(speedInput.value) || 1;
+        buildMatrix(columns, digits, speed);
+        startFlicker(120);
+      }
+
+      regenBtn.addEventListener('click', applyFromControls);
+
+      // regenerate on resize for better layout
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => applyFromControls(), 250);
+      });
+
+      // initial build
+      applyFromControls();
+    })();
+  </script>
+</body>
+</html>
